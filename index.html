@@ -140,12 +140,6 @@
     let logoDataUrl = 'baitedlogowhite.png';
     let backgroundDataUrl = '';
 
-    document.getElementById('logoUpload').addEventListener('change', function(e) {
-      const reader = new FileReader();
-      reader.onload = () => { logoDataUrl = reader.result; generateSVG(); };
-      reader.readAsDataURL(e.target.files[0]);
-    });
-
     document.getElementById('bgUpload').addEventListener('change', function(e) {
       const reader = new FileReader();
       reader.onload = () => { backgroundDataUrl = reader.result; generateSVG(); };
@@ -187,7 +181,7 @@
         <rect width="800" height="120" fill="white" opacity="0.5"/>
         <rect x="${800 - categoryWidth - 40}" y="30" width="${categoryWidth}" height="50" rx="8" fill="#ffff00"/>
         <text x="${800 - categoryWidth / 2 - 40}" y="60" font-size="20" font-weight="bold" font-family="Arial" text-anchor="middle">${category}</text>
-        ${logoDataUrl ? `<image href="${logoDataUrl}" x="40" y="20" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>` : ''}
+        <image href="${logoDataUrl}" x="40" y="20" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>
         ${headlineText}
         <rect y="720" width="800" height="80" fill="black"/>
         <text x="400" y="760" font-size="18" font-family="Arial" fill="white" font-weight="bold" text-anchor="middle">
