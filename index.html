@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baited Post Generator</title>
+  <title>Dynamic Post Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -215,8 +215,8 @@
       const category = document.getElementById('category').value;
       const author = document.getElementById('author').value;
 
-      // Wrap text with very conservative character limit
-      const lines = wrapText(heading, 12); // Only 12 characters per line - very safe
+      // Wrap text with balanced character limit 
+      const lines = wrapText(heading, 18); // Reduced from 25 to 18 characters per line
       let y = 200; // Start higher to accommodate header
       
       let headlineText = lines.map(line => {
