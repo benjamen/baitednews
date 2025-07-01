@@ -90,6 +90,18 @@
       margin-top: 20px;
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       max-width: 200px;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
     }
 
     @media (max-width: 768px) {
@@ -144,6 +156,10 @@
         const reader = new FileReader();
         reader.onload = () => { logoDataUrl = reader.result; generateSVG(); };
         reader.readAsDataURL(blob);
+      })
+      .catch(() => {
+        // Logo not found, continue without it
+        generateSVG();
       });
 
     let backgroundDataUrl = '';
@@ -153,19 +169,44 @@
       reader.readAsDataURL(e.target.files[0]);
     });
 
-    function wrapText(text, maxWidth = 680, fontSize = 60) {
+    function wrapText(text, maxCharsPerLine = 12) {
       const words = text.split(' ');
-      let lines = [], line = '';
-      const maxCharsPerLine = Math.floor(maxWidth / (fontSize * 0.55));
+      const lines = [];
+      let currentLine = '';
+      
       words.forEach(word => {
-        if ((line + word).length <= maxCharsPerLine) {
-          line += (line ? ' ' : '') + word;
+        // If a single word is too long, break it up
+        if (word.length > maxCharsPerLine) {
+          // Add current line if it exists
+          if (currentLine) {
+            lines.push(currentLine);
+            currentLine = '';
+          }
+          
+          // Break the long word into chunks
+          for (let i = 0; i < word.length; i += maxCharsPerLine) {
+            lines.push(word.slice(i, i + maxCharsPerLine));
+          }
         } else {
-          lines.push(line);
-          line = word;
+          const testLine = currentLine + (currentLine ? ' ' : '') + word;
+          if (testLine.length <= maxCharsPerLine) {
+            currentLine = testLine;
+          } else {
+            if (currentLine) {
+              lines.push(currentLine);
+              currentLine = word;
+            } else {
+              lines.push(word);
+              currentLine = '';
+            }
+          }
         }
       });
-      if (line) lines.push(line);
+      
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      
       return lines;
     }
 
@@ -174,25 +215,38 @@
       const category = document.getElementById('category').value;
       const author = document.getElementById('author').value;
 
-      const lines = wrapText(heading);
-      let y = 280;
-      let headlineText = lines.map(line =>
-        `<text x="400" y="${y += 64}" font-size="60" font-family="Arial" fill="white" font-weight="bold" text-anchor="middle">${line}</text>`
-      ).join('');
+      // Wrap text with very conservative character limit
+      const lines = wrapText(heading, 12); // Only 12 characters per line - very safe
+      let y = 200; // Start higher to accommodate header
+      
+      let headlineText = lines.map(line => {
+        y += 70; // Line height
+        return `<text x="400" y="${y}" font-size="60" font-family="Arial, sans-serif" fill="white" font-weight="bold" text-anchor="middle" stroke="rgba(0,0,0,0.3)" stroke-width="1">${line}</text>`;
+      }).join('');
 
       const categoryWidth = category.length * 12 + 40;
 
       let svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="800" height="800">
-        ${backgroundDataUrl ? `<image href="${backgroundDataUrl}" x="0" y="0" width="800" height="800" preserveAspectRatio="none"/>` : `<rect width="800" height="800" fill="#ccc"/>`}
-        <rect width="800" height="120" fill="white" opacity="0.5"/>
-        <rect x="${800 - categoryWidth - 40}" y="30" width="${categoryWidth}" height="50" rx="8" fill="#ffff00"/>
-        <text x="${800 - categoryWidth / 2 - 40}" y="60" font-size="20" font-weight="bold" font-family="Arial" text-anchor="middle">${category}</text>
-        ${logoDataUrl ? `<image href="${logoDataUrl}" x="40" y="20" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>` : ''}
+        ${backgroundDataUrl ? `<image href="${backgroundDataUrl}" x="0" y="0" width="800" height="800" preserveAspectRatio="xMidYMid slice"/>` : `<rect width="800" height="800" fill="#ccc"/>`}
+        
+        <!-- Header background -->
+        <rect width="800" height="120" fill="rgba(255,255,255,0.9)"/>
+        
+        <!-- Category badge - aligned with logo -->
+        <rect x="${800 - categoryWidth - 40}" y="35" width="${categoryWidth}" height="50" rx="25" fill="#ffff00"/>
+        <text x="${800 - categoryWidth / 2 - 40}" y="65" font-size="18" font-weight="bold" font-family="Arial, sans-serif" text-anchor="middle" fill="#333">${category}</text>
+        
+        <!-- Logo - aligned horizontally with category -->
+        ${logoDataUrl ? `<image href="${logoDataUrl}" x="40" y="35" width="50" height="50" preserveAspectRatio="xMidYMid meet"/>` : ''}
+        
+        <!-- Headline text with proper margins -->
         ${headlineText}
-        <rect y="720" width="800" height="80" fill="black"/>
-        <text x="400" y="760" font-size="18" font-family="Arial" fill="white" font-weight="bold" text-anchor="middle">
-          ${author} <tspan fill="#f36">| @baitednews</tspan>
+        
+        <!-- Footer -->
+        <rect y="720" width="800" height="80" fill="rgba(0,0,0,0.8)"/>
+        <text x="400" y="760" font-size="18" font-family="Arial, sans-serif" fill="white" font-weight="bold" text-anchor="middle">
+          ${author} <tspan fill="#ff3366">| @baitednews</tspan>
         </text>
         </svg>
       `;
@@ -222,10 +276,12 @@
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+          URL.revokeObjectURL(a.href);
         });
       };
       img.onerror = function() {
         alert('Failed to render PNG image. Please try again.');
+        URL.revokeObjectURL(url);
       };
       img.src = url;
     }
