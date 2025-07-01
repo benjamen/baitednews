@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynamic Post Generator</title>
+  <title>Baited Post Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -149,26 +149,18 @@
   </div>
 
   <script>
-    let logoDataUrl = 'https://github.com/benjamen/baitednews/blob/main/logotrans.png';
-    
-    // Try to read the uploaded logo file
-    async function loadLogo() {
-      try {
-        const logoData = await window.fs.readFile('logotrans.png');
-        const blob = new Blob([logoData], { type: 'image/png' });
+    let logoDataUrl = '';
+    fetch('logotrans.png')
+      .then(res => res.blob())
+      .then(blob => {
         const reader = new FileReader();
-        reader.onload = () => { 
-          logoDataUrl = reader.result; 
-          generateSVG(); 
-        };
+        reader.onload = () => { logoDataUrl = reader.result; generateSVG(); };
         reader.readAsDataURL(blob);
-      } catch (error) {
-        console.log('Logo file not found, continuing without logo');
+      })
+      .catch(() => {
+        // Logo not found, continue without it
         generateSVG();
-      }
-    }
-    
-    loadLogo();
+      });
 
     let backgroundDataUrl = '';
     document.getElementById('bgUpload').addEventListener('change', function(e) {
@@ -223,8 +215,8 @@
       const category = document.getElementById('category').value;
       const author = document.getElementById('author').value;
 
-      // Wrap text with balanced character limit 
-      const lines = wrapText(heading, 18); // Reduced from 25 to 18 characters per line
+      // Wrap text with very conservative character limit
+      const lines = wrapText(heading, 12); // Only 12 characters per line - very safe
       let y = 200; // Start higher to accommodate header
       
       let headlineText = lines.map(line => {
