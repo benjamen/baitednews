@@ -133,7 +133,7 @@
 
       <div class="form-group">
         <label for="category">Category:</label>
-        <select id="category">
+        <select id="category" style="color: white;">
           <option value="World" data-color="#4169e1">World</option>
           <option value="NZ" data-color="#ffeb3b">NZ</option>
           <option value="Business" data-color="#4b4b4b">Business</option>
@@ -162,11 +162,6 @@
           <option value="black">Black</option>
           <option value="pink">Pink</option>
         </select>
-      </div>
-
-      <div class="form-group">
-        <label for="categoryColor">Category Background Color:</label>
-        <input type="color" id="categoryColor" value="#ffeb3b" />
       </div>
 
       <div class="form-group">
@@ -247,9 +242,7 @@
       const categorySelect = document.getElementById('category');
       const category = categorySelect.value;
       const selectedOption = categorySelect.options[categorySelect.selectedIndex];
-      const defaultCategoryColor = selectedOption.getAttribute('data-color');
-      const manualCategoryColor = document.getElementById('categoryColor').value;
-      const categoryColor = manualCategoryColor || defaultCategoryColor;
+      const categoryColor = selectedOption.getAttribute('data-color');
       const author = document.getElementById('author').value;
       const fontColor = document.getElementById('fontColor').value;
       const categoryTextColor = getContrastColor(categoryColor);
@@ -327,7 +320,19 @@
     document.getElementById('category').addEventListener('change', function () {
       const selectedOption = this.options[this.selectedIndex];
       const color = selectedOption.getAttribute('data-color');
-      document.getElementById('categoryColor').value = color;
+      const contrast = getContrastColor(color);
+      this.style.backgroundColor = color;
+      this.style.color = contrast;
+      generateSVG();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const category = document.getElementById('category');
+      const selectedOption = category.options[category.selectedIndex];
+      const color = selectedOption.getAttribute('data-color');
+      const contrast = getContrastColor(color);
+      category.style.backgroundColor = color;
+      category.style.color = contrast;
     });
 
     generateSVG();
