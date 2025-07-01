@@ -243,7 +243,7 @@
       const category = categorySelect.value;
       const selectedOption = categorySelect.options[categorySelect.selectedIndex];
       const categoryColor = selectedOption.getAttribute('data-color');
-      const author = document.getElementById('author').value;
+      const author = document.getElementById('author').value.toLowerCase();
       const fontColor = document.getElementById('fontColor').value;
       const categoryTextColor = getContrastColor(categoryColor);
 
