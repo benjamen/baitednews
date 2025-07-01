@@ -150,17 +150,25 @@
 
   <script>
     let logoDataUrl = '';
-    fetch('logotrans.png')
-      .then(res => res.blob())
-      .then(blob => {
+    
+    // Try to read the uploaded logo file
+    async function loadLogo() {
+      try {
+        const logoData = await window.fs.readFile('logotrans.png');
+        const blob = new Blob([logoData], { type: 'image/png' });
         const reader = new FileReader();
-        reader.onload = () => { logoDataUrl = reader.result; generateSVG(); };
+        reader.onload = () => { 
+          logoDataUrl = reader.result; 
+          generateSVG(); 
+        };
         reader.readAsDataURL(blob);
-      })
-      .catch(() => {
-        // Logo not found, continue without it
+      } catch (error) {
+        console.log('Logo file not found, continuing without logo');
         generateSVG();
-      });
+      }
+    }
+    
+    loadLogo();
 
     let backgroundDataUrl = '';
     document.getElementById('bgUpload').addEventListener('change', function(e) {
