@@ -138,6 +138,18 @@
         <input type="text" id="author" value="muddoogan" />
       </div>
       <div class="form-group">
+        <label for="fontColor">Headline Font Color:</label>
+        <select id="fontColor">
+          <option value="white" selected>White</option>
+          <option value="black">Black</option>
+          <option value="pink">Pink</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="categoryColor">Category Background Color:</label>
+        <input type="color" id="categoryColor" value="#ffff00" />
+      </div>
+      <div class="form-group">
         <label for="bgUpload">Background Image:</label>
         <input type="file" id="bgUpload" accept="image/*" />
       </div>
@@ -158,7 +170,6 @@
         reader.readAsDataURL(blob);
       })
       .catch(() => {
-        // Logo not found, continue without it
         generateSVG();
       });
 
@@ -175,15 +186,11 @@
       let currentLine = '';
       
       words.forEach(word => {
-        // If a single word is too long, break it up
         if (word.length > maxCharsPerLine) {
-          // Add current line if it exists
           if (currentLine) {
             lines.push(currentLine);
             currentLine = '';
           }
-          
-          // Break the long word into chunks
           for (let i = 0; i < word.length; i += maxCharsPerLine) {
             lines.push(word.slice(i, i + maxCharsPerLine));
           }
@@ -206,7 +213,6 @@
       if (currentLine) {
         lines.push(currentLine);
       }
-      
       return lines;
     }
 
@@ -214,14 +220,15 @@
       const heading = document.getElementById('heading').value;
       const category = document.getElementById('category').value;
       const author = document.getElementById('author').value;
+      const fontColor = document.getElementById('fontColor').value;
+      const categoryColor = document.getElementById('categoryColor').value;
 
-      // Wrap text with balanced character limit 
-      const lines = wrapText(heading, 18); // Reduced from 25 to 18 characters per line
-      let y = 200; // Start higher to accommodate header
-      
+      const lines = wrapText(heading, 18);
+      let y = 200;
+
       let headlineText = lines.map(line => {
-        y += 70; // Line height
-        return `<text x="400" y="${y}" font-size="60" font-family="Arial, sans-serif" fill="white" font-weight="bold" text-anchor="middle" stroke="rgba(0,0,0,0.3)" stroke-width="1">${line}</text>`;
+        y += 70;
+        return `<text x="400" y="${y}" font-size="60" font-family="Arial, sans-serif" fill="${fontColor}" font-weight="bold" text-anchor="middle" stroke="rgba(0,0,0,0.3)" stroke-width="1">${line}</text>`;
       }).join('');
 
       const categoryWidth = category.length * 12 + 40;
@@ -230,20 +237,15 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="800" height="800">
         ${backgroundDataUrl ? `<image href="${backgroundDataUrl}" x="0" y="0" width="800" height="800" preserveAspectRatio="xMidYMid slice"/>` : `<rect width="800" height="800" fill="#ccc"/>`}
         
-        <!-- Header background -->
         <rect width="800" height="120" fill="rgba(255,255,255,0.9)"/>
         
-        <!-- Category badge - aligned with logo -->
-        <rect x="${800 - categoryWidth - 40}" y="35" width="${categoryWidth}" height="50" rx="25" fill="#ffff00"/>
+        <rect x="${800 - categoryWidth - 40}" y="35" width="${categoryWidth}" height="50" rx="25" fill="${categoryColor}"/>
         <text x="${800 - categoryWidth / 2 - 40}" y="65" font-size="18" font-weight="bold" font-family="Arial, sans-serif" text-anchor="middle" fill="#333">${category}</text>
         
-        <!-- Logo - aligned horizontally with category, 50% bigger -->
         ${logoDataUrl ? `<image href="${logoDataUrl}" x="40" y="22.5" width="75" height="75" preserveAspectRatio="xMidYMid meet"/>` : ''}
         
-        <!-- Headline text with proper margins -->
         ${headlineText}
         
-        <!-- Footer -->
         <rect y="720" width="800" height="80" fill="rgba(0,0,0,0.8)"/>
         <text x="400" y="760" font-size="18" font-family="Arial, sans-serif" fill="white" font-weight="bold" text-anchor="middle">
           ${author} <tspan fill="#ff4d6d">| @baitednews</tspan>
@@ -286,8 +288,9 @@
       img.src = url;
     }
 
-    document.querySelectorAll('input, textarea').forEach(input => {
+    document.querySelectorAll('input, textarea, select').forEach(input => {
       input.addEventListener('input', generateSVG);
+      input.addEventListener('change', generateSVG);
     });
 
     generateSVG();
